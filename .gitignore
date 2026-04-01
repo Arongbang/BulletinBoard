@@ -1,0 +1,11 @@
+# Build outputs
+bulletin-backend/target/
+bulletin-frontend/dist/
+bulletin-frontend/node_modules/
+bulletin-frontend/package-lock.json
+
+# Sensitive config
+bulletin-backend/src/main/resources/application.yml
+
+# Claude Code
+.claude/

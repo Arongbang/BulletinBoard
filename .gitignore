@@ -6,6 +6,7 @@ bulletin-frontend/package-lock.json
 
 # Sensitive config
 bulletin-backend/src/main/resources/application.yml
+.env
 
 # Claude Code
 .claude/

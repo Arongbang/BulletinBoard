@@ -1,0 +1,56 @@
+services:
+
+  # ─── Oracle XE 21c ───────────────────────────────────────────────────────────
+  oracle-db:
+    image: gvenzl/oracle-xe:21-slim-faststart
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      ORACLE_PASSWORD: ${ORACLE_SYS_PASSWORD}
+      APP_USER: ${ORACLE_APP_USER}
+      APP_USER_PASSWORD: ${ORACLE_APP_PASSWORD}
+    ports:
+      - "1522:1521"    # 로컬 SQL 클라이언트용 (선택) — 1521은 로컬 Oracle 리스너가 점유 중
+    volumes:
+      - oracle-data:/opt/oracle/oradata                           # 재시작 후에도 데이터 유지
+      - ./docker/oracle:/container-entrypoint-initdb.d:ro         # 최초 부팅 시 01_schema.sql 실행
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 30s
+      timeout: 20s
+      retries: 15
+      start_period: 180s
+
+  # ─── Spring Boot Backend ─────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./bulletin-backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:oracle:thin:@oracle-db:1521/XEPDB1
+      SPRING_DATASOURCE_USERNAME: ${ORACLE_APP_USER}
+      SPRING_DATASOURCE_PASSWORD: ${ORACLE_APP_PASSWORD}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+      SPRING_JPA_SHOW_SQL: ${SPRING_JPA_SHOW_SQL}
+      SPRING_JPA_DDL_AUTO: ${SPRING_JPA_DDL_AUTO}
+    expose:
+      - "8080"         # Docker 내부 네트워크에만 노출 (nginx가 프록시) — 외부 직접 접근 차단
+    depends_on:
+      oracle-db:
+        condition: service_healthy
+
+  # ─── Vue 3 Frontend (nginx) ──────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./bulletin-frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "80:80"        # 외부에 노출되는 유일한 진입점
+    depends_on:
+      - backend
+
+volumes:
+  oracle-data:

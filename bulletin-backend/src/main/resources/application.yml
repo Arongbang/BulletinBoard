@@ -1,22 +1,35 @@
 spring:
   datasource:
-    url: jdbc:oracle:thin:@localhost:1521:XE
-    username: bulletin
-    password: bulletin
+    # Docker: SPRING_DATASOURCE_URL 환경변수로 oracle-db 서비스 지정
+    # 로컬:  환경변수 없으면 localhost 폴백
+    url: ${SPRING_DATASOURCE_URL:jdbc:oracle:thin:@localhost:1521/XEPDB1}
+    username: ${SPRING_DATASOURCE_USERNAME:board_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:board_pass}
     driver-class-name: oracle.jdbc.OracleDriver
+    hikari:
+      connection-timeout: 60000
+      initialization-fail-timeout: 60000
 
   jpa:
     hibernate:
-      ddl-auto: none
-    show-sql: true
+      # 운영 환경에서는 .env 의 SPRING_JPA_DDL_AUTO=validate 로 변경 권장
+      # (스키마를 Hibernate가 자동 변경하지 않도록 방지)
+      ddl-auto: ${SPRING_JPA_DDL_AUTO:update}
+    open-in-view: false   # 뷰 렌더링 중 DB 쿼리 방지 (LazyInitializationException 조기 발견)
+    show-sql: ${SPRING_JPA_SHOW_SQL:false}
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false
         dialect: org.hibernate.dialect.OracleDialect
 
   sql:
     init:
       mode: never
+
+app:
+  cors:
+    # 운영 배포 시 .env 의 CORS_ALLOWED_ORIGINS 를 실제 도메인으로 변경
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
 
 server:
   port: 8080

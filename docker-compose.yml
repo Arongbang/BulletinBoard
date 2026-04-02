@@ -13,7 +13,7 @@ services:
       - "1522:1521"    # 로컬 SQL 클라이언트용 (선택) — 1521은 로컬 Oracle 리스너가 점유 중
     volumes:
       - oracle-data:/opt/oracle/oradata                           # 재시작 후에도 데이터 유지
-      - ./docker/oracle:/container-entrypoint-initdb.d:ro         # 최초 부팅 시 01_schema.sql 실행
+      - ./docker/oracle:/container-entrypoint-initdb.d:ro         # 최초 부팅 시 init.sql 자동 실행 (볼륨 비어 있을 때만)
     healthcheck:
       test: ["CMD", "healthcheck.sh"]
       interval: 30s

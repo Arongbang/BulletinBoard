@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB = "a01053912492@gmail.com"
+        DOCKER_HUB = "arongbang"
     }
 
     stages {

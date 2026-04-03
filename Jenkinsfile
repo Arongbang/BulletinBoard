@@ -3,23 +3,20 @@ pipeline {
 
     environment {
         DOCKER_HUB = "arongbang"
+		VERSION = "${env.BUILD_NUMBER}"
     }
 
     stages {
-		stage('Debug') {
-			steps {
-				sh 'ls -al'
-			}
-		}
-		
         stage('Backend Build') {
             steps {
+				sh 'docker build -t $DOCKER_HUB/backend:$VERSION ./bulletin-backend'
                 sh 'docker build -t $DOCKER_HUB/backend:latest ./bulletin-backend'
             }
         }
 
         stage('Frontend Build') {
             steps {
+				sh 'docker build -t $DOCKER_HUB/frontend:$VERSION ./bulletin-frontend'
                 sh 'docker build -t $DOCKER_HUB/frontend:latest ./bulletin-frontend'
             }
         }
@@ -34,7 +31,9 @@ pipeline {
 
         stage('Docker Push') {
             steps {
+				sh 'docker push $DOCKER_HUB/backend:$VERSION'
                 sh 'docker push $DOCKER_HUB/backend:latest'
+				sh 'docker push $DOCKER_HUB/frontend:$VERSION'
                 sh 'docker push $DOCKER_HUB/frontend:latest'
             }
         }

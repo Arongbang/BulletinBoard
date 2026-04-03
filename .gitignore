@@ -8,5 +8,8 @@ bulletin-frontend/package-lock.json
 bulletin-backend/src/main/resources/application.yml
 .env
 
+# IDE
+.vscode/
+
 # Claude Code
 .claude/

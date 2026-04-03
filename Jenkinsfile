@@ -14,13 +14,13 @@ pipeline {
 		
         stage('Backend Build') {
             steps {
-                sh 'docker build -t $DOCKER_HUB/backend:latest ./backend'
+                sh 'docker build -t $DOCKER_HUB/backend:latest ./bulletin-backend'
             }
         }
 
         stage('Frontend Build') {
             steps {
-                sh 'docker build -t $DOCKER_HUB/frontend:latest ./frontend'
+                sh 'docker build -t $DOCKER_HUB/frontend:latest ./bulletin-frontend'
             }
         }
 

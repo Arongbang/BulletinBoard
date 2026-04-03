@@ -6,6 +6,12 @@ pipeline {
     }
 
     stages {
+		stage('Debug') {
+			steps {
+				sh 'ls -al'
+			}
+		}
+		
         stage('Backend Build') {
             steps {
                 sh 'docker build -t $DOCKER_HUB/backend:latest ./backend'

@@ -12,9 +12,9 @@ spring:
 
   jpa:
     hibernate:
-      # 운영 환경에서는 .env 의 SPRING_JPA_DDL_AUTO=validate 로 변경 권장
-      # (스키마를 Hibernate가 자동 변경하지 않도록 방지)
-      ddl-auto: ${SPRING_JPA_DDL_AUTO:update}
+      # 스키마는 docker/oracle/init.sh 에서 관리 (board_user 스키마)
+      # 운영 환경에서도 none 유지 — 스키마 변경 시 init.sh 수정 후 reset-dev.sh 실행
+      ddl-auto: ${SPRING_JPA_DDL_AUTO:none}
     open-in-view: false   # 뷰 렌더링 중 DB 쿼리 방지 (LazyInitializationException 조기 발견)
     show-sql: ${SPRING_JPA_SHOW_SQL:false}
     properties:

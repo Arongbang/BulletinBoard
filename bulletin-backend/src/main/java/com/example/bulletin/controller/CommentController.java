@@ -39,7 +39,9 @@ public class CommentController {
             @PathVariable Long postId,
             @PathVariable Long commentId,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        commentService.deleteComment(postId, commentId, userDetails.getId());
+        boolean isAdmin = userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        commentService.deleteComment(postId, commentId, userDetails.getId(), isAdmin);
         return ResponseEntity.noContent().build();
     }
 }

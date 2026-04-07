@@ -50,7 +50,7 @@ public class CommentService {
         return CommentResponse.from(commentRepository.save(comment));
     }
 
-    public void deleteComment(Long postId, Long commentId, Long userId) {
+    public void deleteComment(Long postId, Long commentId, Long userId, boolean isAdmin) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "댓글을 찾을 수 없습니다."));
 
@@ -58,7 +58,8 @@ public class CommentService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당 게시글의 댓글이 아닙니다.");
         }
 
-        if (!comment.getUser().getId().equals(userId)) {
+        // 작성자 본인 또는 ADMIN만 삭제 허용
+        if (!isAdmin && !comment.getUser().getId().equals(userId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "삭제 권한이 없습니다.");
         }
 

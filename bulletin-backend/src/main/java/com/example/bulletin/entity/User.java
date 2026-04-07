@@ -26,6 +26,11 @@ public class User {
     @Column(nullable = false, length = 255)
     private String password;
 
+    // 역할: 'USER'(기본) 또는 'ADMIN'
+    @Builder.Default
+    @Column(nullable = false, length = 20)
+    private String role = "USER";
+
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Post> posts = new ArrayList<>();

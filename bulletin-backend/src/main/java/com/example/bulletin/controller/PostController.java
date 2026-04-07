@@ -45,14 +45,18 @@ public class PostController {
             @PathVariable Long id,
             @Valid @RequestBody PostRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(postService.updatePost(id, request, userDetails.getId()));
+        boolean isAdmin = userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        return ResponseEntity.ok(postService.updatePost(id, request, userDetails.getId(), isAdmin));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePost(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        postService.deletePost(id, userDetails.getId());
+        boolean isAdmin = userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        postService.deletePost(id, userDetails.getId(), isAdmin);
         return ResponseEntity.noContent().build();
     }
 }

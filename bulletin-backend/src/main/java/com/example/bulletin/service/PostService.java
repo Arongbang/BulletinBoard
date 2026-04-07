@@ -51,11 +51,12 @@ public class PostService {
         return PostDetailResponse.from(postRepository.save(post));
     }
 
-    public PostDetailResponse updatePost(Long id, PostRequest request, Long userId) {
+    public PostDetailResponse updatePost(Long id, PostRequest request, Long userId, boolean isAdmin) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시글을 찾을 수 없습니다."));
 
-        if (!post.getUser().getId().equals(userId)) {
+        // 작성자 본인 또는 ADMIN만 수정 허용
+        if (!isAdmin && !post.getUser().getId().equals(userId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "수정 권한이 없습니다.");
         }
 
@@ -65,11 +66,12 @@ public class PostService {
         return PostDetailResponse.from(postRepository.save(post));
     }
 
-    public void deletePost(Long id, Long userId) {
+    public void deletePost(Long id, Long userId, boolean isAdmin) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시글을 찾을 수 없습니다."));
 
-        if (!post.getUser().getId().equals(userId)) {
+        // 작성자 본인 또는 ADMIN만 삭제 허용
+        if (!isAdmin && !post.getUser().getId().equals(userId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "삭제 권한이 없습니다.");
         }
 

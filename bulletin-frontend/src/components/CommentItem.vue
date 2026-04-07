@@ -4,7 +4,7 @@
       <span class="comment-author">{{ comment.author }}</span>
       <span class="comment-date">{{ formatDate(comment.createdAt) }}</span>
       <button
-        v-if="authStore.user?.id === comment.authorId"
+        v-if="authStore.isAdmin || authStore.user?.id === comment.authorId"
         class="btn-delete"
         @click="$emit('delete', comment.id)"
       >삭제</button>

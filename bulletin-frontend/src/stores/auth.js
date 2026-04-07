@@ -1,9 +1,12 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { authApi } from '../api/auth'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
+
+  // 관리자 여부: 백엔드 LoginResponse의 role 필드 기반
+  const isAdmin = computed(() => user.value?.role === 'ADMIN')
 
   async function fetchMe() {
     try {
@@ -22,5 +25,5 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = null
   }
 
-  return { user, fetchMe, login, logout }
+  return { user, isAdmin, fetchMe, login, logout }
 })

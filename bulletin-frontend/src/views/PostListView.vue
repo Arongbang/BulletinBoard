@@ -15,6 +15,7 @@
           <th class="col-title">제목</th>
           <th class="col-author">작성자</th>
           <th class="col-date">작성일</th>
+          <th v-if="authStore.user" class="col-actions"></th>
         </tr>
       </thead>
       <tbody>
@@ -23,6 +24,12 @@
           <td class="title">{{ post.title }}</td>
           <td>{{ post.author }}</td>
           <td>{{ formatDate(post.createdAt) }}</td>
+          <td v-if="authStore.user" class="col-actions" @click.stop>
+            <template v-if="authStore.isAdmin || authStore.user.username === post.author">
+              <button class="btn-edit" @click.stop="goEdit(post.id)">수정</button>
+              <button class="btn-del" @click.stop="handleDelete(post.id)">삭제</button>
+            </template>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -39,13 +46,29 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { postsApi } from '../api/posts'
+import { useAuthStore } from '../stores/auth'
 
 const router = useRouter()
+const authStore = useAuthStore()
 const posts = ref([])
 const loading = ref(false)
 const error = ref('')
 const page = ref(0)
 const totalPages = ref(0)
+
+async function handleDelete(id) {
+  if (!confirm('게시글을 삭제하시겠습니까?')) return
+  try {
+    await postsApi.remove(id)
+    await fetchPosts()
+  } catch (e) {
+    alert(e.message)
+  }
+}
+
+function goEdit(id) {
+  router.push(`/posts/${id}/edit`)
+}
 
 async function fetchPosts() {
   loading.value = true
@@ -101,6 +124,17 @@ th { font-weight: 600; }
 .col-id { width: 60px; }
 .col-author { width: 110px; }
 .col-date { width: 120px; }
+.col-actions { width: 110px; text-align: right; }
+.btn-edit, .btn-del {
+  padding: 3px 10px;
+  border-radius: 5px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  border: none;
+  margin-left: 4px;
+}
+.btn-edit { background: #dbeafe; color: #1e40af; }
+.btn-del { background: #fee2e2; color: #ef4444; }
 .row { cursor: pointer; transition: background .15s; }
 .row:hover { background: #eff6ff; }
 td { border-bottom: 1px solid #f3f4f6; color: #374151; }

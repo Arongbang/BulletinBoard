@@ -9,7 +9,7 @@
         <div class="post-meta">
           <span class="author">{{ post.author }}</span>
           <span class="date">{{ formatDate(post.createdAt) }}</span>
-          <div class="actions" v-if="authStore.user?.id === post.authorId">
+          <div class="actions" v-if="authStore.isAdmin || authStore.user?.id === post.authorId">
             <button class="btn-edit" @click="goEdit">수정</button>
             <button class="btn-del" @click="handleDelete">삭제</button>
           </div>

@@ -7,6 +7,9 @@ export const commentsApi = {
   create: (postId, content) =>
     api.post(`/posts/${postId}/comments`, { content }).then((r) => r.data),
 
+  update: (postId, commentId, content) =>
+    api.put(`/posts/${postId}/comments/${commentId}`, { content }).then((r) => r.data),
+
   remove: (postId, commentId) =>
     api.delete(`/posts/${postId}/comments/${commentId}`).then((r) => r.data)
 }

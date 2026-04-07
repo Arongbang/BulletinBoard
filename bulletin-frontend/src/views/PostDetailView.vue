@@ -1,31 +1,51 @@
 <template>
   <div>
-    <div v-if="loading" class="status">불러오는 중...</div>
-    <div v-else-if="error" class="status error">{{ error }}</div>
+    <div v-if="loading" class="status-box">
+      <div class="spinner"></div> 불러오는 중...
+    </div>
+    <div v-else-if="error" class="status-box error">⚠️ {{ error }}</div>
 
     <template v-else-if="post">
-      <!-- 게시글 -->
-      <div class="card">
-        <div class="post-meta">
-          <span class="author">{{ post.author }}</span>
-          <span class="date">{{ formatDate(post.createdAt) }}</span>
-          <div class="actions" v-if="authStore.isAdmin || authStore.user?.id === post.authorId">
-            <button class="btn-edit" @click="goEdit">수정</button>
-            <button class="btn-del" @click="handleDelete">삭제</button>
+      <!-- 게시글 카드 -->
+      <div class="post-card">
+        <!-- 제목 영역 -->
+        <div class="post-head">
+          <h1 class="post-title">{{ post.title }}</h1>
+          <div class="post-meta">
+            <span class="meta-author">{{ post.author }}</span>
+            <span class="meta-sep">·</span>
+            <span class="meta-date">{{ formatDate(post.createdAt) }}</span>
+            <div
+              class="post-actions"
+              v-if="authStore.isAdmin || authStore.user?.id === post.authorId"
+            >
+              <button class="act-btn edit" @click="goEdit">수정</button>
+              <button class="act-btn del" @click="handleDelete">삭제</button>
+            </div>
           </div>
         </div>
-        <h2 class="post-title">{{ post.title }}</h2>
-        <hr />
-        <pre class="post-content">{{ post.content }}</pre>
+
+        <div class="divider"></div>
+
+        <!-- 본문 -->
+        <div class="post-body">
+          <pre class="post-content">{{ post.content }}</pre>
+        </div>
       </div>
 
-      <button class="btn-back" @click="router.push('/')">목록으로</button>
+      <!-- 목록 버튼 -->
+      <button class="btn-back" @click="router.push('/')">← 목록으로</button>
 
-      <!-- 댓글 -->
-      <div class="card comments-card">
-        <h3>댓글 {{ post.comments.length }}개</h3>
+      <!-- 댓글 섹션 -->
+      <div class="comments-card">
+        <h3 class="comments-title">
+          댓글 <span class="count">{{ post.comments.length }}</span>
+        </h3>
 
-        <div v-if="post.comments.length === 0" class="no-comment">댓글이 없습니다.</div>
+        <div v-if="post.comments.length === 0" class="no-comment">
+          첫 번째 댓글을 남겨보세요.
+        </div>
+
         <CommentItem
           v-for="c in post.comments"
           :key="c.id"
@@ -33,18 +53,30 @@
           @delete="handleDeleteComment"
         />
 
-        <!-- 댓글 작성 -->
+        <!-- 댓글 작성 폼 -->
         <div v-if="authStore.user" class="comment-form">
-          <textarea
-            v-model="newComment"
-            placeholder="댓글을 입력하세요..."
-            rows="3"
-          ></textarea>
-          <button class="btn-submit" @click="submitComment" :disabled="!newComment.trim()">
-            댓글 등록
-          </button>
+          <div class="form-avatar">{{ authStore.user.username[0].toUpperCase() }}</div>
+          <div class="form-input-wrap">
+            <textarea
+              v-model="newComment"
+              placeholder="댓글을 입력하세요..."
+              rows="3"
+            ></textarea>
+            <div class="form-footer">
+              <span class="char-count">{{ newComment.length }} / 500</span>
+              <button
+                class="btn-submit"
+                @click="submitComment"
+                :disabled="!newComment.trim()"
+              >
+                댓글 등록
+              </button>
+            </div>
+          </div>
         </div>
-        <p v-else class="login-hint">댓글을 작성하려면 <router-link to="/login">로그인</router-link>하세요.</p>
+        <div v-else class="login-hint">
+          <router-link to="/login">로그인</router-link> 후 댓글을 작성할 수 있습니다.
+        </div>
       </div>
     </template>
   </div>
@@ -115,79 +147,228 @@ async function handleDeleteComment(commentId) {
 }
 
 function formatDate(dateStr) {
-  return new Date(dateStr).toLocaleString('ko-KR')
+  return new Date(dateStr).toLocaleString('ko-KR', {
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit'
+  })
 }
 
 onMounted(fetchPost)
 </script>
 
 <style scoped>
-.status { text-align: center; padding: 40px; color: #6b7280; }
-.status.error { color: #ef4444; }
-.card {
+/* 상태 박스 */
+.status-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 60px 0;
+  color: #888;
   background: #fff;
   border-radius: 10px;
-  padding: 28px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  box-shadow: 0 1px 4px rgba(0,0,0,.05);
+}
+.status-box.error { color: #e53e3e; }
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #eee;
+  border-top-color: #03C75A;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* 게시글 카드 */
+.post-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 6px rgba(0,0,0,.07);
+  overflow: hidden;
   margin-bottom: 16px;
 }
+
+.post-head {
+  padding: 28px 28px 20px;
+}
+
+.post-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.4;
+  margin-bottom: 14px;
+}
+
 .post-meta {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-  font-size: 0.875rem;
+  gap: 8px;
+  flex-wrap: wrap;
 }
-.author { font-weight: 600; color: #1e40af; }
-.date { color: #9ca3af; }
-.actions { margin-left: auto; display: flex; gap: 8px; }
-.btn-edit, .btn-del {
+.meta-author {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #03C75A;
+}
+.meta-sep { color: #ddd; }
+.meta-date {
+  font-size: 0.85rem;
+  color: #aaa;
+}
+
+.post-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+}
+.act-btn {
   padding: 4px 12px;
-  border-radius: 6px;
+  border-radius: 4px;
   font-size: 0.8rem;
+  font-weight: 600;
   cursor: pointer;
-  border: none;
+  border: 1px solid transparent;
+  font-family: inherit;
+  transition: all 0.12s;
 }
-.btn-edit { background: #dbeafe; color: #1e40af; }
-.btn-del { background: #fee2e2; color: #ef4444; }
-.post-title { font-size: 1.4rem; color: #1e3a8a; margin-bottom: 16px; }
-hr { border: none; border-top: 1px solid #e5e7eb; margin-bottom: 20px; }
-.post-content { font-size: 0.95rem; line-height: 1.7; color: #374151; white-space: pre-wrap; font-family: inherit; }
+.act-btn.edit {
+  background: #f0fdf4;
+  color: #16a34a;
+  border-color: #bbf7d0;
+}
+.act-btn.edit:hover { background: #dcfce7; }
+.act-btn.del {
+  background: #fff5f5;
+  color: #e53e3e;
+  border-color: #fed7d7;
+}
+.act-btn.del:hover { background: #ffe4e6; }
+
+.divider {
+  height: 1px;
+  background: #f0f0f0;
+  margin: 0 28px;
+}
+
+.post-body {
+  padding: 24px 28px 32px;
+}
+.post-content {
+  font-size: 0.975rem;
+  line-height: 1.85;
+  color: #333;
+  white-space: pre-wrap;
+  font-family: inherit;
+}
+
+/* 목록 버튼 */
 .btn-back {
   background: none;
-  border: 1px solid #d1d5db;
-  padding: 7px 18px;
-  border-radius: 7px;
+  border: 1px solid #ddd;
+  padding: 8px 18px;
+  border-radius: 6px;
   cursor: pointer;
-  margin-bottom: 20px;
   font-size: 0.875rem;
-  color: #6b7280;
+  color: #666;
+  margin-bottom: 20px;
+  font-family: inherit;
+  transition: all 0.12s;
 }
-.comments-card h3 { margin-bottom: 16px; font-size: 1rem; color: #1e3a8a; }
-.no-comment { color: #9ca3af; font-size: 0.875rem; margin-bottom: 16px; }
-.comment-form { margin-top: 20px; }
+.btn-back:hover { border-color: #03C75A; color: #03C75A; }
+
+/* 댓글 카드 */
+.comments-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px 28px;
+  box-shadow: 0 1px 6px rgba(0,0,0,.07);
+}
+
+.comments-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 20px;
+}
+.count {
+  color: #03C75A;
+  font-weight: 700;
+}
+
+.no-comment {
+  color: #bbb;
+  font-size: 0.9rem;
+  padding: 20px 0;
+  text-align: center;
+}
+
+/* 댓글 작성 폼 */
+.comment-form {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #f0f0f0;
+}
+.form-avatar {
+  width: 36px;
+  height: 36px;
+  background: #03C75A;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+.form-input-wrap { flex: 1; }
 textarea {
   width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #d1d5db;
+  padding: 12px 14px;
+  border: 1px solid #e0e0e0;
   border-radius: 8px;
-  resize: vertical;
   font-size: 0.9rem;
   font-family: inherit;
   outline: none;
+  resize: vertical;
+  transition: border-color 0.2s;
+  background: #fafafa;
 }
-textarea:focus { border-color: #1e40af; }
-.btn-submit {
+textarea:focus { border-color: #03C75A; background: #fff; box-shadow: 0 0 0 3px rgba(3,199,90,0.08); }
+
+.form-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-top: 8px;
+}
+.char-count { font-size: 0.78rem; color: #bbb; }
+.btn-submit {
   padding: 8px 20px;
-  background: #1e40af;
+  background: #03C75A;
   color: #fff;
   border: none;
-  border-radius: 7px;
-  cursor: pointer;
+  border-radius: 6px;
   font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
 }
-.btn-submit:disabled { opacity: .5; cursor: default; }
-.login-hint { margin-top: 16px; font-size: 0.875rem; color: #6b7280; }
-.login-hint a { color: #1e40af; }
+.btn-submit:hover { background: #02b351; }
+.btn-submit:disabled { opacity: 0.5; cursor: default; }
+
+.login-hint {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #f0f0f0;
+  font-size: 0.875rem;
+  color: #aaa;
+  text-align: center;
+}
+.login-hint a { color: #03C75A; font-weight: 600; }
 </style>

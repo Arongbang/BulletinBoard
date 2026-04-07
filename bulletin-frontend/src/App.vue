@@ -6,21 +6,27 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
 import NavBar from './components/NavBar.vue'
-import { useAuthStore } from './stores/auth'
-
-const authStore = useAuthStore()
-
-onMounted(() => {
-  authStore.fetchMe()
-})
 </script>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f5f6f7;
+  color: #1a1a1a;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+a { text-decoration: none; color: inherit; }
+
 .container {
-  max-width: 900px;
-  margin: 30px auto;
-  padding: 0 16px;
+  max-width: 960px;
+  margin: 32px auto;
+  padding: 0 20px;
 }
 </style>
